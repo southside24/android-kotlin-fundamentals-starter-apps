@@ -27,11 +27,16 @@ import androidx.core.app.ShareCompat
 import androidx.databinding.DataBindingUtil
 import com.example.android.dessertclicker.databinding.ActivityMainBinding
 import timber.log.Timber
+const val KEY_REVENUE = "revenue_key"
+const val KEY_DESSERT_SOLD = "dessert_sold_key"
+const val KEY_TIMER_SECONDS = "key_timer_seconds"
 
 class MainActivity : AppCompatActivity() {
 
     private var revenue = 0
     private var dessertsSold = 0
+
+    private lateinit var dessertTimer : DessertTimer
 
     // Contains all the views
     private lateinit var binding: ActivityMainBinding
@@ -66,12 +71,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.i("onCreate Called")
-
         // Use Data Binding to get reference to the views
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        binding.dessertButton.setOnClickListener {
-            onDessertClicked()
+        dessertTimer = DessertTimer(this.lifecycle)
+        if(savedInstanceState != null){
+            revenue = savedInstanceState.getInt(KEY_REVENUE, 0)
+            dessertTimer.secondsCount = savedInstanceState.getInt(KEY_TIMER_SECONDS, 0)
+            dessertsSold = savedInstanceState.getInt(KEY_DESSERT_SOLD, 0)
+            showCurrentDessert()
         }
 
         // Set the TextViews to the right values
@@ -80,6 +88,9 @@ class MainActivity : AppCompatActivity() {
 
         // Make sure the correct dessert is showing
         binding.dessertButton.setImageResource(currentDessert.imageId)
+        binding.dessertButton.setOnClickListener {
+            onDessertClicked()
+        }
     }
 
     /**
@@ -139,7 +150,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-
         Timber.i("OnStart Called")
     }
 
@@ -150,12 +160,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        Timber.i("onPause celled")
+        Timber.i("onPause called")
     }
 
     override fun onStop() {
         super.onStop()
-        Timber.i("onStop celled")
+        Timber.i("onStop called")
     }
 
     override fun onDestroy() {
@@ -166,6 +176,14 @@ class MainActivity : AppCompatActivity() {
     override fun onRestart() {
         super.onRestart()
         Timber.i("onRestart called")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putInt(KEY_REVENUE, revenue)
+        outState?.putInt(KEY_DESSERT_SOLD, dessertsSold)
+        outState?.putInt(KEY_TIMER_SECONDS, dessertTimer.secondsCount)
+        super.onSaveInstanceState(outState)
+        Timber.i("onSaveInstanceState Called")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
