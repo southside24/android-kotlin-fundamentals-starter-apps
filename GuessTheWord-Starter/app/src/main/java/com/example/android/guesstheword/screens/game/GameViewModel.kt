@@ -160,5 +160,4 @@ class GameViewModel : ViewModel() {
         timer.cancel()
     }
 
-
 }
